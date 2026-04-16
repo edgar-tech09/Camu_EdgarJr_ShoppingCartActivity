@@ -2,7 +2,7 @@ using System;
 
 namespace Camu_EdgarJr_ShoppingCartActivity
 {
-
+    
     class Ukayproduct
     {
         public int ID;
@@ -10,18 +10,19 @@ namespace Camu_EdgarJr_ShoppingCartActivity
         public double Price;
         public int Stock;
 
-        public void DisplayProduct()
+        public void DisplayUkayProd()
         {
-
+            
             Console.WriteLine(ID + " . " + BrandName.PadRight(30) + " | PHP " + Price + " | " + Stock + " PCS");
         }
 
-        public double GetSubtotal(int quantity)
+        public double Subtotal(int quantity)
         {
             return Price * quantity;
         }
     }
 
+    
     class Program
     {
         static Ukayproduct[] inventory = new Ukayproduct[20];
@@ -55,7 +56,8 @@ namespace Camu_EdgarJr_ShoppingCartActivity
                     Console.ReadKey(); 
                 }
             }
-             
+            
+                    
             ShowCheckout();
         }
 
@@ -82,4 +84,52 @@ namespace Camu_EdgarJr_ShoppingCartActivity
             inventory[18] = new Ukayproduct { ID = 19, BrandName = "Mixed Brand Casual Shoes", Price = 900, Stock = 90 };
             inventory[19] = new Ukayproduct { ID = 20, BrandName = "Mixed Brand Formal Shoes", Price = 1300, Stock = 39 };
         }
+
+        static void ShowMenu()
+        {
+            Console.WriteLine("Jhear's Thrift Shop");
+            Console.WriteLine("ID".PadRight(5) + "BRAND NAME".PadRight(30) + "PRICE".PadRight(15) + "STOCK");
+            Console.WriteLine("---------------------------------------------------------------");
+            foreach (var item in inventory)
+            {
+                if (item != null) item.DisplayUkayProd();
+            }
+        }
+
+        static void ProcessOrder(int prodID)
+        {
+            Ukayproduct choosed = null;
+            foreach (var item in inventory)
+            {
+                if (item.ID == prodID) { choosed = item; break; }
+            }
+
+            if (choosed != null && choosed.Stock > 0)
+            {
+                Console.Write("How many " + choosed.BrandName + "? ");
+                if (int.TryParse(Console.ReadLine(), out int quantity) && quantity <= choosed.Stock)
+                {
+                    double sub = choosed.Subtotal(quantity);
+                    grandTotal += sub;
+                    choosed.Stock -= quantity;
+                    Console.WriteLine("Added! Subtotal: P" + sub);
+                }
+                else Console.WriteLine("Invalid quantity or low stock!");
+            }
+            else Console.WriteLine("Item not found or Sold out!");
+        }
+
+        static void ShowCheckout()
+        {
+            Console.Clear();
+            Console.WriteLine("=== FINAL RECEIPT ===");
+            double discount = (grandTotal >= 5000) ? grandTotal * 0.10 : 0;
+
+            Console.WriteLine("Total Order: P" + grandTotal);
+            if (discount > 0) Console.WriteLine("10% Discount: -P" + discount);
+            Console.WriteLine("Final Payment: P" + (grandTotal - discount));
+            Console.WriteLine("\nThank you for buying in Jhear's Thrift Shop!!!");
+            Console.ReadKey();
+        }
     }
+}
