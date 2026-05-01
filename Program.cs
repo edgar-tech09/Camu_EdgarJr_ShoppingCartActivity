@@ -2,13 +2,17 @@ using System;
 
 namespace Camu_EdgarJr_ShoppingCartActivity
 {
-  
+
     class Program
     {
         static Ukayproduct[] inventory = new Ukayproduct[20];
 
         static CartItem[] SelectedItems = new CartItem[20];
+
+        static int receiptNo = 1;
+
         static int CartItems = 0;
+
 
         static void Main(string[] args)
         {
@@ -168,7 +172,10 @@ namespace Camu_EdgarJr_ShoppingCartActivity
 
         static void ShowCheckout()
         {
+
             Console.Clear();
+            Console.WriteLine("Receipt No: " + receiptNo);
+            Console.WriteLine("Date: " + DateTime.Now);
             Console.WriteLine("=== FINAL RECEIPT ===");
 
             double GrandTotal = 0;
@@ -193,7 +200,22 @@ namespace Camu_EdgarJr_ShoppingCartActivity
             double FinalPay = GrandTotal - disc;
             Console.WriteLine("Final Payment: P " + FinalPay);
 
+            double payment;
+
+            do
+            {
+                Console.Write("\nEnter payment: ");
+            }
+            while (!double.TryParse(Console.ReadLine(), out payment) || payment < FinalPay);
+
+            double change = payment - FinalPay;
+
+            Console.WriteLine("Payment: P " + payment);
+
+            Console.WriteLine("Change: P " + change);
+
             Console.WriteLine("\nRemaining Stock:");
+
             foreach (var item in inventory)
             {
                 if (item != null)
@@ -204,27 +226,31 @@ namespace Camu_EdgarJr_ShoppingCartActivity
             Console.WriteLine();
             Console.WriteLine("\nPress ENTER to exit");
             Console.ReadKey();
-        }   
+            receiptNo++;
+        }
 
-            static void ViewCart()
+
+
+
+        static void ViewCart()
+        {
+            Console.WriteLine("\n=== YOUR CART ===");
+
+            if (CartItems == 0)
             {
-                Console.WriteLine("\n=== YOUR CART ===");
-
-                if (CartItems == 0)
-                {
-                    Console.WriteLine("Cart is empty.");
-                    return;
-                }
-
-                for (int i = 0; i < CartItems; i++)
-                {
-                    Console.WriteLine((i + 1) + ". "
-                        + SelectedItems[i].Product.BrandName
-                        + " x" + SelectedItems[i].Quantity
-                        + " = P " + SelectedItems[i].GetSubtotal());
-
-                }
+                Console.WriteLine("Cart is empty.");
+                return;
             }
+
+            for (int i = 0; i < CartItems; i++)
+            {
+                Console.WriteLine((i + 1) + ". "
+                    + SelectedItems[i].Product.BrandName
+                    + " x" + SelectedItems[i].Quantity
+                    + " = P " + SelectedItems[i].GetSubtotal());
+
+            }
+        }
         static void RemoveItem()
         {
             ViewCart();
@@ -256,8 +282,10 @@ namespace Camu_EdgarJr_ShoppingCartActivity
             CartItems = 0;
             Console.WriteLine("All items removed from the cart");
         }
+
+       }
     }
-}
+
 
 
 
