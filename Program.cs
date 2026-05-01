@@ -1,63 +1,45 @@
-using System;
+﻿using System;
 
 namespace Camu_EdgarJr_ShoppingCartActivity
 {
-    
-    class Ukayproduct
-    {
-        public int ID;
-        public string BrandName;
-        public double Price;
-        public int Stock;
-
-        public void DisplayUkayProd()
-        {
-            
-            Console.WriteLine(ID + " . " + BrandName.PadRight(30) + " | PHP " + Price + " | " + Stock + " PCS");
-        }
-
-        public double Subtotal(int quantity)
-        {
-            return Price * quantity;
-        }
-    }
-
-    
+  
     class Program
     {
         static Ukayproduct[] inventory = new Ukayproduct[20];
-        static double grandTotal = 0;
+
+        static CartItem[] SelectedItems = new CartItem[20];
+        static int TotalItems = 0;
 
         static void Main(string[] args)
         {
             SetupInventory();
 
             bool shopping = true;
+
             while (shopping)
             {
                 Console.Clear();
                 ShowMenu();
                 Console.Write("\nEnter Product ID to purchase [Type 'X' to Finish]: ");
-                string input = Console.ReadLine();
+                string userInput = Console.ReadLine();
 
-                if (input.ToUpper() == "X")
+                if (userInput.ToUpper() == "X")
                 {
                     shopping = false;
-                    Console.WriteLine("\nThankyou Sir, Proceeding to checkout");
+                    Console.WriteLine("\nProceeding to checkout...");
                 }
-              
-                else if (int.TryParse(input, out int choice))
+                else if (int.TryParse(userInput, out int prodChoice))
                 {
-                    ProcessOrder(choice);
+                    ProcessOrder(prodChoice);
                 }
                 else
                 {
-                    Console.WriteLine("The input is wrong, use X only");
-                    Console.ReadKey(); 
+                    Console.WriteLine("Invalid input. Press any key...");
+                    Console.ReadKey();
                 }
             }
-            
-                    
+
+
             ShowCheckout();
         }
 
@@ -90,6 +72,7 @@ namespace Camu_EdgarJr_ShoppingCartActivity
             Console.WriteLine("Jhear's Thrift Shop");
             Console.WriteLine("ID".PadRight(5) + "BRAND NAME".PadRight(30) + "PRICE".PadRight(15) + "STOCK");
             Console.WriteLine("---------------------------------------------------------------");
+
             foreach (var item in inventory)
             {
                 if (item != null) item.DisplayUkayProd();
@@ -98,38 +81,132 @@ namespace Camu_EdgarJr_ShoppingCartActivity
 
         static void ProcessOrder(int prodID)
         {
-            Ukayproduct choosed = null;
+            Ukayproduct PickedProduct = null;
+
             foreach (var item in inventory)
             {
-                if (item.ID == prodID) { choosed = item; break; }
+                if (item != null && item.ID == prodID)
+                {
+                    PickedProduct = item;
+                    break;
+                }
             }
 
-            if (choosed != null && choosed.Stock > 0)
+            if (PickedProduct == null)
             {
-                Console.Write("How many " + choosed.BrandName + "? ");
-                if (int.TryParse(Console.ReadLine(), out int quantity) && quantity <= choosed.Stock)
-                {
-                    double sub = choosed.Subtotal(quantity);
-                    grandTotal += sub;
-                    choosed.Stock -= quantity;
-                    Console.WriteLine("Added! Subtotal: P" + sub);
-                }
-                else Console.WriteLine("Invalid quantity or low stock!");
+                Console.WriteLine("Item not found.");
+                Console.ReadKey();
+                return;
             }
-            else Console.WriteLine("Item not found or Sold out!");
+
+            if (PickedProduct.Stock == 0)
+            {
+                Console.WriteLine("Out of stock.");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.Write("How many " + PickedProduct.BrandName + "? ");
+            if (!int.TryParse(Console.ReadLine(), out int orderqty) || orderqty <= 0)
+            {
+                Console.WriteLine("Invalid quantity.");
+                Console.ReadKey();
+                return;
+            }
+
+            if (orderqty > PickedProduct.Stock)
+            {
+                Console.WriteLine("Not enough stock.");
+                Console.ReadKey();
+                return;
+            }
+
+            bool setup = false;
+
+            for (int i = 0; i < TotalItems; i++)
+            {
+                if (SelectedItems[i].Product.ID == PickedProduct.ID)
+                {
+                    SelectedItems[i].Quantity += orderqty;
+                    setup = true;
+                    break;
+                }
+            }
+
+            if (!setup)
+            {
+                SelectedItems[TotalItems] = new CartItem();
+                SelectedItems[TotalItems].Product = PickedProduct;
+                SelectedItems[TotalItems].Quantity = orderqty;
+                TotalItems++;
+            }
+
+            PickedProduct.Stock -= orderqty;
+
+            Console.WriteLine("Added successfully!");
+
+            string next;
+            do
+            {
+                Console.Write("\nPress Y to continue shopping or X to checkout: ");
+                next = Console.ReadLine().ToUpper();
+
+                if (next == "X")
+                {
+                    ShowCheckout();
+                    Environment.Exit(0);
+                }
+                else if (next != "Y")
+                {
+                    Console.WriteLine("Invalid input. Please enter Y or X only.");
+                }
+
+            } while (next != "Y");
         }
+
+
 
         static void ShowCheckout()
         {
             Console.Clear();
             Console.WriteLine("=== FINAL RECEIPT ===");
-            double discount = (grandTotal >= 5000) ? grandTotal * 0.10 : 0;
 
-            Console.WriteLine("Total Order: P" + grandTotal);
-            if (discount > 0) Console.WriteLine("10% Discount: -P" + discount);
-            Console.WriteLine("Final Payment: P" + (grandTotal - discount));
-            Console.WriteLine("\nThank you for buying in Jhear's Thrift Shop!!!");
+            double GrandTotal = 0;
+
+            for (int i = 0; i < TotalItems; i++)
+            {
+                double subtotal = SelectedItems[i].GetSubtotal();
+                Console.WriteLine(SelectedItems[i].Product.BrandName + " x" + SelectedItems[i].Quantity + " = P " + subtotal);
+                GrandTotal += subtotal;
+            }
+
+            Console.WriteLine("----------------------------------");
+            Console.WriteLine("Total: P " + GrandTotal);
+
+            double disc = 0;
+            if (GrandTotal >= 5000)
+            {
+                disc = GrandTotal * 0.10;
+                Console.WriteLine("Discount (10%): -P " + disc);
+            }
+
+            double FinalPay = GrandTotal - disc;
+            Console.WriteLine("Final Payment: P " + FinalPay);
+
+            Console.WriteLine("\nRemaining Stock:");
+            foreach (var item in inventory)
+            {
+                if (item != null)
+                    item.DisplayUkayProd();
+            }
+            Console.WriteLine();
+            Console.WriteLine("THANK YOU, MA'AM/SIR!!");
+            Console.WriteLine();
+            Console.WriteLine("\nPress ENTER to exit");
             Console.ReadKey();
         }
     }
 }
+
+
+
