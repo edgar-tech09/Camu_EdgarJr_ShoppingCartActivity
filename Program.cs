@@ -24,25 +24,47 @@ namespace Camu_EdgarJr_ShoppingCartActivity
             {
                 Console.Clear();
                 ShowMenu();
-                Console.Write("\nEnter Product ID to purchase [Type 'X' to Finish]: ");
-                string userInput = Console.ReadLine();
 
-                if (userInput.ToUpper() == "X")
+                Console.Write("\nChoose Option: ");
+                string userInput = Console.ReadLine().ToUpper();
+
+                if (userInput == "1")
+                {
+                    Console.Write("Enter Product ID: ");
+                    if (int.TryParse(Console.ReadLine(), out int prodChoice))
+                    {
+                        ProcessOrder(prodChoice);
+
+                        Console.WriteLine("\nPress any ENTER to continue...");
+                        Console.ReadKey();
+                    }
+                }
+                else if (userInput == "2")
+                {
+                    ViewCart();
+                    Console.ReadKey();
+                }
+                else if (userInput == "3")
+                {
+                    RemoveItem();
+                    Console.ReadKey();
+                }
+                else if (userInput == "4")
+                {
+                    ClearCart();
+                    Console.ReadKey();
+                }
+                else if (userInput == "X")
                 {
                     shopping = false;
                     Console.WriteLine("\nProceeding to checkout...");
                 }
-                else if (int.TryParse(userInput, out int prodChoice))
-                {
-                    ProcessOrder(prodChoice);
-                }
                 else
                 {
-                    Console.WriteLine("Invalid input. Press any key...");
+                    Console.WriteLine("Invalid input.");
                     Console.ReadKey();
                 }
             }
-
 
             ShowCheckout();
         }
@@ -74,7 +96,13 @@ namespace Camu_EdgarJr_ShoppingCartActivity
         static void ShowMenu()
         {
             Console.WriteLine("Jhear's Thrift Shop");
-            Console.WriteLine("ID".PadRight(5) + "BRAND NAME".PadRight(30) + "PRICE".PadRight(15) + "STOCK");
+            Console.WriteLine("\n[1] Purvhase Item");
+            Console.WriteLine("[2] View Cart");
+            Console.WriteLine("[3] Delete Item");
+            Console.WriteLine("[4] Clear Cart");
+            Console.WriteLine("[X] Checkout");
+
+            Console.WriteLine("\nID".PadRight(5) + "BRAND NAME".PadRight(30) + "PRICE".PadRight(15) + "STOCK");
             Console.WriteLine("---------------------------------------------------------------");
 
             foreach (var item in inventory)
