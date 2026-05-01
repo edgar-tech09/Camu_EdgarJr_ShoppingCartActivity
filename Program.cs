@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Camu_EdgarJr_ShoppingCartActivity
 {
@@ -8,7 +8,7 @@ namespace Camu_EdgarJr_ShoppingCartActivity
         static Ukayproduct[] inventory = new Ukayproduct[20];
 
         static CartItem[] SelectedItems = new CartItem[20];
-        static int TotalItems = 0;
+        static int CartItems = 0;
 
         static void Main(string[] args)
         {
@@ -123,7 +123,7 @@ namespace Camu_EdgarJr_ShoppingCartActivity
 
             bool setup = false;
 
-            for (int i = 0; i < TotalItems; i++)
+            for (int i = 0; i < CartItems; i++)
             {
                 if (SelectedItems[i].Product.ID == PickedProduct.ID)
                 {
@@ -135,10 +135,10 @@ namespace Camu_EdgarJr_ShoppingCartActivity
 
             if (!setup)
             {
-                SelectedItems[TotalItems] = new CartItem();
-                SelectedItems[TotalItems].Product = PickedProduct;
-                SelectedItems[TotalItems].Quantity = orderqty;
-                TotalItems++;
+                SelectedItems[CartItems] = new CartItem();
+                SelectedItems[CartItems].Product = PickedProduct;
+                SelectedItems[CartItems].Quantity = orderqty;
+                CartItems++;
             }
 
             PickedProduct.Stock -= orderqty;
@@ -173,7 +173,7 @@ namespace Camu_EdgarJr_ShoppingCartActivity
 
             double GrandTotal = 0;
 
-            for (int i = 0; i < TotalItems; i++)
+            for (int i = 0; i < CartItems; i++)
             {
                 double subtotal = SelectedItems[i].GetSubtotal();
                 Console.WriteLine(SelectedItems[i].Product.BrandName + " x" + SelectedItems[i].Quantity + " = P " + subtotal);
@@ -204,6 +204,57 @@ namespace Camu_EdgarJr_ShoppingCartActivity
             Console.WriteLine();
             Console.WriteLine("\nPress ENTER to exit");
             Console.ReadKey();
+        }   
+
+            static void ViewCart()
+            {
+                Console.WriteLine("\n=== YOUR CART ===");
+
+                if (CartItems == 0)
+                {
+                    Console.WriteLine("Cart is empty.");
+                    return;
+                }
+
+                for (int i = 0; i < CartItems; i++)
+                {
+                    Console.WriteLine((i + 1) + ". "
+                        + SelectedItems[i].Product.BrandName
+                        + " x" + SelectedItems[i].Quantity
+                        + " = P " + SelectedItems[i].GetSubtotal());
+
+                }
+            }
+        static void RemoveItem()
+        {
+            ViewCart();
+
+            Console.Write("\nEnter item number to remove: ");
+            if (int.TryParse(Console.ReadLine(), out int CartIndex))
+            {
+                CartIndex--;
+
+                if (CartIndex >= 0 && CartIndex < CartItems)
+                {
+                    SelectedItems[CartIndex] = SelectedItems[CartItems - 1];
+                    CartItems--;
+                    Console.WriteLine("Removed Item");
+                }
+                else
+                {
+                    Console.WriteLine("Invalid item number");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid input");
+            }
+        }
+
+        static void ClearCart()
+        {
+            CartItems = 0;
+            Console.WriteLine("All items removed from the cart");
         }
     }
 }
