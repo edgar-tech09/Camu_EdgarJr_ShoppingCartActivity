@@ -2,62 +2,70 @@ using System;
 
 namespace Camu_EdgarJr_ShoppingCartActivity
 {
-    
-    class Ukayproduct
-    {
-        public int ID;
-        public string BrandName;
-        public double Price;
-        public int Stock;
 
-        public void DisplayUkayProd()
-        {
-            
-            Console.WriteLine(ID + " . " + BrandName.PadRight(30) + " | PHP " + Price + " | " + Stock + " PCS");
-        }
-
-        public double Subtotal(int quantity)
-        {
-            return Price * quantity;
-        }
-    }
-
-    
     class Program
     {
         static Ukayproduct[] inventory = new Ukayproduct[20];
-        static double grandTotal = 0;
+
+        static CartItem[] SelectedItems = new CartItem[20];
+
+        static int receiptNo = 1;
+
+        static int CartItems = 0;
+
 
         static void Main(string[] args)
         {
             SetupInventory();
 
             bool shopping = true;
+
             while (shopping)
             {
                 Console.Clear();
                 ShowMenu();
-                Console.Write("\nEnter Product ID to purchase [Type 'X' to Finish]: ");
-                string input = Console.ReadLine();
 
-                if (input.ToUpper() == "X")
+                Console.Write("\nChoose Option: ");
+                string userInput = Console.ReadLine().ToUpper();
+
+                if (userInput == "1")
+                {
+                    Console.Write("Enter Product ID: ");
+                    if (int.TryParse(Console.ReadLine(), out int prodChoice))
+                    {
+                        ProcessOrder(prodChoice);
+
+                        Console.WriteLine("\nPress any ENTER to continue...");
+                        Console.ReadKey();
+                    }
+                }
+                else if (userInput == "2")
+                {
+                    ViewCart();
+                    Console.ReadKey();
+                }
+                else if (userInput == "3")
+                {
+                    RemoveItem();
+                    Console.ReadKey();
+                }
+                else if (userInput == "4")
+                {
+                    ClearCart();
+                    Console.ReadKey();
+                }
+                else if (userInput == "X")
                 {
                     shopping = false;
-                    Console.WriteLine("\nThankyou Sir, Proceeding to checkout");
-                }
-              
-                else if (int.TryParse(input, out int choice))
-                {
-                    ProcessOrder(choice);
+                    Console.WriteLine("\nProceeding to checkout...");
                 }
                 else
                 {
-                    Console.WriteLine("The input is wrong, use X only");
-                    Console.ReadKey(); 
+                    Console.WriteLine("Invalid input.");
+                    Console.ReadKey();
                 }
             }
-            
-                    
+
             ShowCheckout();
         }
 
@@ -88,8 +96,15 @@ namespace Camu_EdgarJr_ShoppingCartActivity
         static void ShowMenu()
         {
             Console.WriteLine("Jhear's Thrift Shop");
-            Console.WriteLine("ID".PadRight(5) + "BRAND NAME".PadRight(30) + "PRICE".PadRight(15) + "STOCK");
+            Console.WriteLine("\n[1] Purvhase Item");
+            Console.WriteLine("[2] View Cart");
+            Console.WriteLine("[3] Delete Item");
+            Console.WriteLine("[4] Clear Cart");
+            Console.WriteLine("[X] Checkout");
+
+            Console.WriteLine("\nID".PadRight(5) + "BRAND NAME".PadRight(30) + "PRICE".PadRight(15) + "STOCK");
             Console.WriteLine("---------------------------------------------------------------");
+
             foreach (var item in inventory)
             {
                 if (item != null) item.DisplayUkayProd();
@@ -98,38 +113,207 @@ namespace Camu_EdgarJr_ShoppingCartActivity
 
         static void ProcessOrder(int prodID)
         {
-            Ukayproduct choosed = null;
+            Ukayproduct PickedProduct = null;
+
             foreach (var item in inventory)
             {
-                if (item.ID == prodID) { choosed = item; break; }
+                if (item != null && item.ID == prodID)
+                {
+                    PickedProduct = item;
+                    break;
+                }
             }
 
-            if (choosed != null && choosed.Stock > 0)
+            if (PickedProduct == null)
             {
-                Console.Write("How many " + choosed.BrandName + "? ");
-                if (int.TryParse(Console.ReadLine(), out int quantity) && quantity <= choosed.Stock)
-                {
-                    double sub = choosed.Subtotal(quantity);
-                    grandTotal += sub;
-                    choosed.Stock -= quantity;
-                    Console.WriteLine("Added! Subtotal: P" + sub);
-                }
-                else Console.WriteLine("Invalid quantity or low stock!");
+                Console.WriteLine("Item not found.");
+                Console.ReadKey();
+                return;
             }
-            else Console.WriteLine("Item not found or Sold out!");
+
+            if (PickedProduct.Stock == 0)
+            {
+                Console.WriteLine("Out of stock.");
+                Console.ReadKey();
+                return;
+            }
+
+            Console.Write("How many " + PickedProduct.BrandName + "? ");
+            if (!int.TryParse(Console.ReadLine(), out int orderqty) || orderqty <= 0)
+            {
+                Console.WriteLine("Invalid quantity.");
+                Console.ReadKey();
+                return;
+            }
+
+            if (orderqty > PickedProduct.Stock)
+            {
+                Console.WriteLine("Not enough stock.");
+                Console.ReadKey();
+                return;
+            }
+
+            bool setup = false;
+
+            for (int i = 0; i < CartItems; i++)
+            {
+                if (SelectedItems[i].Product.ID == PickedProduct.ID)
+                {
+                    SelectedItems[i].Quantity += orderqty;
+                    setup = true;
+                    break;
+                }
+            }
+
+            if (!setup)
+            {
+                SelectedItems[CartItems] = new CartItem();
+                SelectedItems[CartItems].Product = PickedProduct;
+                SelectedItems[CartItems].Quantity = orderqty;
+                CartItems++;
+            }
+
+            PickedProduct.Stock -= orderqty;
+
+            Console.WriteLine("Added successfully!");
+
+            string next;
+            do
+            {
+                Console.Write("\nPress Y to continue shopping or X to checkout: ");
+                next = Console.ReadLine().ToUpper();
+
+                if (next == "X")
+                {
+                    ShowCheckout();
+                    Environment.Exit(0);
+                }
+                else if (next != "Y")
+                {
+                    Console.WriteLine("Invalid input. Please enter Y or X only.");
+                }
+
+            } while (next != "Y");
         }
+
+
 
         static void ShowCheckout()
         {
-            Console.Clear();
-            Console.WriteLine("=== FINAL RECEIPT ===");
-            double discount = (grandTotal >= 5000) ? grandTotal * 0.10 : 0;
 
-            Console.WriteLine("Total Order: P" + grandTotal);
-            if (discount > 0) Console.WriteLine("10% Discount: -P" + discount);
-            Console.WriteLine("Final Payment: P" + (grandTotal - discount));
-            Console.WriteLine("\nThank you for buying in Jhear's Thrift Shop!!!");
+            Console.Clear();
+            Console.WriteLine("Receipt No: " + receiptNo);
+            Console.WriteLine("Date: " + DateTime.Now);
+            Console.WriteLine("=== FINAL RECEIPT ===");
+
+            double GrandTotal = 0;
+
+            for (int i = 0; i < CartItems; i++)
+            {
+                double subtotal = SelectedItems[i].GetSubtotal();
+                Console.WriteLine(SelectedItems[i].Product.BrandName + " x" + SelectedItems[i].Quantity + " = P " + subtotal);
+                GrandTotal += subtotal;
+            }
+
+            Console.WriteLine("----------------------------------");
+            Console.WriteLine("Total: P " + GrandTotal);
+
+            double disc = 0;
+            if (GrandTotal >= 5000)
+            {
+                disc = GrandTotal * 0.10;
+                Console.WriteLine("Discount (10%): -P " + disc);
+            }
+
+            double FinalPay = GrandTotal - disc;
+            Console.WriteLine("Final Payment: P " + FinalPay);
+
+            double payment;
+
+            do
+            {
+                Console.Write("\nEnter payment: ");
+            }
+            while (!double.TryParse(Console.ReadLine(), out payment) || payment < FinalPay);
+
+            double change = payment - FinalPay;
+
+            Console.WriteLine("Payment: P " + payment);
+
+            Console.WriteLine("Change: P " + change);
+
+            Console.WriteLine("\nRemaining Stock:");
+
+            foreach (var item in inventory)
+            {
+                if (item != null)
+                    item.DisplayUkayProd();
+            }
+            Console.WriteLine();
+            Console.WriteLine("THANK YOU, MA'AM/SIR!!");
+            Console.WriteLine();
+            Console.WriteLine("\nPress ENTER to exit");
             Console.ReadKey();
+            receiptNo++;
         }
+
+
+
+
+        static void ViewCart()
+        {
+            Console.WriteLine("\n=== YOUR CART ===");
+
+            if (CartItems == 0)
+            {
+                Console.WriteLine("Cart is empty.");
+                return;
+            }
+
+            for (int i = 0; i < CartItems; i++)
+            {
+                Console.WriteLine((i + 1) + ". "
+                    + SelectedItems[i].Product.BrandName
+                    + " x" + SelectedItems[i].Quantity
+                    + " = P " + SelectedItems[i].GetSubtotal());
+
+            }
+        }
+        static void RemoveItem()
+        {
+            ViewCart();
+
+            Console.Write("\nEnter item number to remove: ");
+            if (int.TryParse(Console.ReadLine(), out int CartIndex))
+            {
+                CartIndex--;
+
+                if (CartIndex >= 0 && CartIndex < CartItems)
+                {
+                    SelectedItems[CartIndex] = SelectedItems[CartItems - 1];
+                    CartItems--;
+                    Console.WriteLine("Removed Item");
+                }
+                else
+                {
+                    Console.WriteLine("Invalid item number");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid input");
+            }
+        }
+
+        static void ClearCart()
+        {
+            CartItems = 0;
+            Console.WriteLine("All items removed from the cart");
+        }
+
+       }
     }
-}
+
+
+
+
