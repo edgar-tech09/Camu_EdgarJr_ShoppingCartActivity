@@ -13,13 +13,21 @@ During development, my project was initially connected to a different repository
 
 FEATURES (Part2)
 -Menu-driven system for easier navigation
+
 -Add items to cart with quantity input
+
 -View cart with item details and subtotal
+
 -Remove specific item from cart
+
 -Clear all items in the cart
+
 -Checkout system with receipt generation
+
 -Automatic total calculation
+
 -10% discount for purchases above PHP 5000
+
 -Input validation to prevent errors
 
 
