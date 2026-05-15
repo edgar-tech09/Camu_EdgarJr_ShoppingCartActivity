@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,14 +13,9 @@ namespace Camu_EdgarJr_ShoppingCartActivity
 
         public double GetSubtotal()
         {
-            return Product.Price * Quantity;
+            return Product.GetPrice() * Quantity;
         }
+
     }
 
 }
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,10 +9,50 @@ namespace Camu_EdgarJr_ShoppingCartActivity
     class Ukayproduct
     {
 
-        public int ID;
-        public string BrandName;
-        public double Price;
-        public int Stock;
+        private int ID;
+        private string BrandName;
+        private double Price;
+        private int Stock;
+
+        public void SetID(int id)
+        {
+            ID = id;
+        }
+
+        public int GetID()
+        {
+            return ID;
+        }
+
+        public void SetBrandName(string brandName)
+        {
+            BrandName = brandName;
+        }
+
+        public string GetBrandName()
+        {
+            return BrandName;
+        }
+
+        public void SetPrice(double price)
+        {
+            Price = price;
+        }
+
+        public double GetPrice()
+        {
+            return Price;
+        }
+
+        public void SetStock(int stock)
+        {
+            Stock = stock;
+        }
+
+        public int GetStock()
+        {
+            return Stock;
+        }
 
         public void DisplayUkayProd()
         {
@@ -24,9 +64,9 @@ namespace Camu_EdgarJr_ShoppingCartActivity
         {
             return Price * quantity;
         }
+
     }
 
 }
 
-   
 
